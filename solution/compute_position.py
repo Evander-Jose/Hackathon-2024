@@ -1,9 +1,9 @@
+import os.path
 from pathlib import Path
 
-import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
-from model import UNET
+import numpy as np
 import torch
 from PIL import Image
 from torchvision import transforms
@@ -11,6 +11,8 @@ import argparse
 import pandas as pd
 from solution_utils import find_valid_gripper_position,visualize_gripper_position, add_row_to_csv, extract_mask
 
+from model import UNET
+from solution_utils import extract_mask, find_valid_gripper_position
 
 # Checkpoint-Pfad für das trainierte Modell
 checkpoint_path = "model/my_checkpoint_wbce.pth.tar"
@@ -51,19 +53,17 @@ def compute_position(part_image_path: Path, gripper_image_path: Path) -> tuple[f
     with torch.no_grad():                                           # Gradientenberechnung deaktivieren
         workpiece_mask = torch.sigmoid(model(image))                # Modellvorhersage (Wahrscheinlichkeiten)
         workpiece_mask = (workpiece_mask > 0.5).float()             # Binäre Maske erzeugen
-        workpiece_mask = workpiece_mask.numpy()                     #In NumPy-Format konvertieren
+        workpiece_mask = workpiece_mask.numpy()                     # In NumPy-Format konvertieren
         workpiece_mask = workpiece_mask[0, 0, :, :]                 # Batch- und Kanal-Dimension entfernen
 
     # Invertiere die Maske (falls nötig)
     workpiece_mask = 1 - workpiece_mask
-    plt.imshow(workpiece_mask, cmap="grey")
-    plt.show()
 
     # Gültige Greifer-Position anhand der Masken ermitteln
     result = find_valid_gripper_position(workpiece_mask, gripper_mask)
 
     # Visualisiere die Greifer-Position auf der Bauteil-Maske
-    visualize_gripper_position(workpiece_mask, gripper_mask, result, original_image)
+    visualize_gripper_position(workpiece_mask, gripper_mask, result, original_image, name=f"{os.path.basename(part_image_path)}+{os.path.basename(gripper_image_path)}")
 
     # Ergebnis (x, y, alpha) speichern, wenn ein gültiger Punkt gefunden wurde
     if result is not None:

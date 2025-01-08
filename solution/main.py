@@ -5,6 +5,7 @@ from rich.progress import track
 import pandas as pd
 
 from compute_position import compute_position
+import os
 
 def compute_amazing_solution(
     part_image_path: Path, gripper_image_path: Path
@@ -44,10 +45,11 @@ def main():
         assert part_image_path.exists(), f"{part_image_path} does not exist"
         assert gripper_image_path.exists(), f"{gripper_image_path} does not exist"
         x, y, angle = compute_amazing_solution(part_image_path, gripper_image_path)
-        results.append([str(part_image_path), str(gripper_image_path), x, y, angle])
+        path_to_visualization_image = f"visualizations/visualization-{os.path.basename(part_image_path)}+{os.path.basename(gripper_image_path)}.png"
+        results.append([str(part_image_path), str(gripper_image_path), x, y, angle, path_to_visualization_image])
 
     # save the results to the output csv file
-    output_df = pd.DataFrame(results, columns=["part", "gripper", "x", "y", "angle"])
+    output_df = pd.DataFrame(results, columns=["part", "gripper", "x", "y", "angle", "visualization"])
     output_df.to_csv(args.output, index=False)
 
 

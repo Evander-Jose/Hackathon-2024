@@ -223,19 +223,17 @@ def find_valid_gripper_position(component_mask, gripper_mask):
 
 
 
-def visualize_gripper_position(component_mask, gripper_mask, result, original_image):
+def visualize_gripper_position(component_mask, gripper_mask, result, original_image, name="mask") -> str:
     """
        Visualisiert die Greiferposition auf der Komponente.
-       Args:
-           component_mask (np.ndarray): Maske der Komponente.
-           gripper_mask (np.ndarray): Maske des Greifers.
-           result (tuple): (x, y, alpha) von find_valid_gripper_position.
-           original_image (np.ndarray): Originalbild der Komponente.
+           :param component_mask (np.ndarray): Maske der Komponente.
+           :param gripper_mask (np.ndarray): Maske des Greifers.
+           :param result (tuple): (x, y, alpha) von find_valid_gripper_position.
+           :param original_image (np.ndarray): Originalbild der Komponente.
+
+           :return: der relative Pfad zur Visualisierung (als png-Datei gespeichert)
        """
     # Code für die Visualisierung der Greiferposition...
-    if result is None:
-        print("No valid position found.")
-        return
 
     x, y, alpha = result
 
@@ -269,7 +267,9 @@ def visualize_gripper_position(component_mask, gripper_mask, result, original_im
     # Add text for x, y, alpha on the plot
     plt.gcf().text(0.5, 0.01, f"Gripper Position: x={x}, y={y}, alpha={alpha}°", ha='center', fontsize=12)
 
-    plt.show()
+    if not os.path.exists("visualizations"):
+        os.mkdir("visualizations")
+    plt.savefig(f"visualizations/visualization-{name}.png")
 
 def add_row_to_csv(file_path_output, new_row):
     """
